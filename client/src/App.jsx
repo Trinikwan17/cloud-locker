@@ -14,7 +14,7 @@ function App() {
 
   const fetchFiles = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/files');
+      const response = await axios.get('http://13.62.50.44:5000/api/files');
       setFiles(response.data);
     } catch (error) {
       console.error("Error fetching files:", error);
@@ -34,7 +34,7 @@ function App() {
     formData.append('document', selectedFile); // 'document' matches the multer expected field name
 
     try {
-      await axios.post('http://localhost:5000/api/files/upload', formData, {
+      await axios.post('http://13.62.50.44:5000/api/files/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert("File successfully sent to AWS S3! 🚀");
