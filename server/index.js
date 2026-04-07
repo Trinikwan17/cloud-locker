@@ -9,6 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 🔥 ADD THIS LINE
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.use('/api/files', fileRoutes);
 
