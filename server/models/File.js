@@ -1,0 +1,10 @@
+const mongoose = require('mongoose');
+
+const fileSchema = new mongoose.Schema({
+  originalName: { type: String, required: true },
+  s3Url: { type: String, required: true },
+  s3Key: { type: String, required: true }, // The unique ID in S3
+  uploadDate: { type: Date, default: Date.now }
+});
+
+module.exports = mongoose.model('File', fileSchema);
