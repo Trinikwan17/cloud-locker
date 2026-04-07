@@ -2,19 +2,21 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
+const API = "http://13.62.50.44:5000";  // your EC2 backend
+
 function App() {
   const [files, setFiles] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Fetch the list of files when the app loads
   useEffect(() => {
     fetchFiles();
   }, []);
 
   const fetchFiles = async () => {
     try {
-      const response = await axios.get('http://13.62.50.44:5000/api/files');
+      const response = await axios.get(`${API}/api/files`);
+      console.log("FILES:", response.data);
       setFiles(response.data);
     } catch (error) {
       console.error("Error fetching files:", error);
@@ -27,22 +29,38 @@ function App() {
 
   const handleUpload = async (event) => {
     event.preventDefault();
-    if (!selectedFile) return alert("Please select a file first!");
+
+    if (!selectedFile) {
+      alert("Please select a file first!");
+      return;
+    }
 
     setUploading(true);
+
     const formData = new FormData();
-    formData.append('document', selectedFile); // 'document' matches the multer expected field name
+    formData.append('document', selectedFile);
 
     try {
-      await axios.post('http://13.62.50.44:5000/api/files/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      alert("File successfully sent to AWS S3! 🚀");
+      const response = await axios.post(
+        `${API}/api/files/upload`,
+        formData
+      );
+
+      console.log("UPLOAD SUCCESS:", response.data);
+
+      alert("File uploaded successfully 🚀");
+
       setSelectedFile(null);
-      fetchFiles(); // Refresh the list
+      fetchFiles();
+
     } catch (error) {
-      console.error("Upload error:", error);
-      alert("Failed to upload file.");
+      console.error("UPLOAD ERROR FULL:", error);
+
+      if (error.response) {
+        console.error("Server response:", error.response.data);
+      }
+
+      alert("Failed to upload file. Check console.");
     } finally {
       setUploading(false);
     }
@@ -58,7 +76,7 @@ function App() {
         <form onSubmit={handleUpload}>
           <input type="file" onChange={handleFileChange} />
           <button type="submit" disabled={uploading}>
-            {uploading ? "Uploading to Cloud..." : "Upload File"}
+            {uploading ? "Uploading..." : "Upload File"}
           </button>
         </form>
       </div>
@@ -66,7 +84,10 @@ function App() {
       {/* File List Section */}
       <div className="file-list">
         <h2>Your Cloud Files</h2>
-        {files.length === 0 ? <p>No files in the vault yet.</p> : (
+
+        {files.length === 0 ? (
+          <p>No files in the vault yet.</p>
+        ) : (
           <ul>
             {files.map((file) => (
               <li key={file._id}>
